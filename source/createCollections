@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# #Creating a collection 'directory' if not exist
+
+#To list all collections
+if [[ $1 == "show" ]]; then
+  for i in $(ls -d ../collections/*/); do echo ${i%%/}; done
+
+
+#To drop a collection is exist
+elif [[ $1 == "drop" ]]; then
+    if [ ! -d "../collections/$2" ]; then
+        echo "There is no collection $2 exist"
+    else
+        rm -r ../collections/$2
+        echo "$2 collection dropped.."
+    fi
+
+#To create new collection if not exit already
+else
+    if [ ! -d "../collections/$1" ]; then
+      echo "Creating New Collection $1"
+      mkdir ../collections/$1
+      echo "Switching to $1 collection.."
+    else
+      echo "Switching to $1 collection.."
+    fi
+fi

@@ -1,0 +1,47 @@
+#!/bin/bash
+echo -e -n "\e[0;33mWelcome to HathoutDB v.1\n"
+echo -e -n "\e[0;33m**You can use MongoDB commands for HathoutDB**\n"
+echo -e -n "\e[0;31m**For more info:"
+echo -e -n "\e[0;32m \$man HathoutDB\n"
+
+# echo -e -n "\e[0;32mHathoutDB>"
+# read cmd
+cmd=0
+currentCollection=''
+
+
+while [[ $cmd != $EOF ]]
+do
+	echo -e -n "\e[0;32mHathoutDB>"
+	read cmd
+	if [[ $cmd == "man HathoutDB" ]]; then
+			echo "Man page"
+
+#use command for opening a collection or creating a new collection if not exist
+	elif [[ $cmd =~ ^use.[a-z|A-Z]+ ]]; then
+			colName="${cmd//use /}"
+			./createCollections $colName
+			currentCollection=$colName
+
+#showing collections: to list all collection names
+	elif [[ $cmd == "show collections" ]]; then
+			./createCollections $cmd
+
+#db.collection.drop(): to remove a collection
+	elif [[ $cmd =~ ^db.+drop ]]; then
+			colNameStart="${cmd//db./}"
+			colName="${colNameStart//.drop()/}"
+			echo $colName
+			./createCollections drop $colName
+			if [[ currentCollection == $colName ]];then
+					currentCollection=''
+			fi
+
+	elif [[ $cmd == $EOF ]]; then
+			echo -e -n "\e[0;31mThank you for using HathoutDB\n"
+	else
+			echo -e -n "\e[0;31mNot a HathoutDB command\n"
+	fi
+
+done
+echo "Bye Bye"
