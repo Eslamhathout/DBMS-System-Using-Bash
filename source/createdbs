@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# #Creating a db 'directory' if not exist
+
+#To list all dbs
+if [[ $1 == "show" ]]; then
+  for i in $(ls -d ../dbs/*/); do echo ${i%%/}; done
+
+
+#To drop a db is exist
+elif [[ $1 == "db.dropDatabase()" ]]; then
+    if [ ! -d "../dbs/$2" ]; then
+        echo "There is no db $2 exist"
+    else
+        rm -r ../dbs/$2
+        echo "$2 db dropped.."
+    fi
+
+#To create new db if not exit already
+else
+    if [ ! -d "../dbs/$1" ]; then
+      echo "Creating New db $1"
+      mkdir ../dbs/$1
+      echo "Switching to $1 db.."
+    else
+      echo "Switching to $1 db.."
+    fi
+fi
