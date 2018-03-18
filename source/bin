@@ -33,35 +33,55 @@ do
 			echo $currentdb
 
 #db.dropDatabase(): Drop a database that is currently in use "You have to make use dbName before using it"
-elif [[ $cmd == "db.dropDatabase()" ]]; then
-		if [[ !  -z  $currentdb ]]; then
-				./createdbs $cmd $currentdb
-				currentdb=''
-		else
-				echo "You should type \$ use dbName before dropping"
-		fi
+	elif [[ $cmd == "db.dropDatabase()" ]]; then
+			if [[ !  -z  $currentdb ]]; then
+						./createdbs $cmd $currentdb
+						currentdb=''
+			else
+						echo "You should type \$ use dbName before dropping"
+			fi
 #########################################End DEALING WIH DATABSES##############################################
 
 #######################################Dealing with Collections################################
 
+# db.createCollection(name): For creating collection.
+elif [[ $cmd =~ ^db.createCollection\(.+\) ]]; then
+			colNametemp="${cmd//db.createCollection\(/}"
+			colName="${colNametemp//\)/}"
+			if [[ !  -z  $currentdb ]]; then
+						./createCollections create $currentdb $colName
+			else
+						echo "You should type \$ use dbName before creating a collection"
+		  fi
 
+#show collections: To list all collection names
+elif [[ $cmd == "show collections" ]]; then
+			if [[ !  -z  $currentdb ]]; then
+						./createCollections show $currentdb
+			else
+						echo "You should type \$ use dbName before creating a collection"
+		  fi
 
+#db.collection.drop(): to remove a collection
+elif [[ $cmd =~ ^db.+drop\(\) ]]; then
+			colNameStart="${cmd//db./}"
+			colName="${colNameStart//.drop()/}"
+			if [[ !  -z  $currentdb ]]; then
+						./createCollections drop $currentdb $colName
+			else
+						echo "You should type \$ use dbName before creating a collection"
+		  fi
 
-# #db.db.drop(): to remove a collection
-# 	elif [[ $cmd =~ ^db.+drop ]]; then
-# 			colNameStart="${cmd//db./}"
-# 			colName="${colNameStart//.drop()/}"
-# 			echo $colName
-# 			./createCollections drop $colName
-# 			if [[ currentCollection == $colName ]];then
-# 					currentCollection=''
-# 			fi
 
 	elif [[ $cmd == $EOF ]]; then
 			echo -e -n "\e[0;31mThank you for using HathoutDB\n"
 	else
 			echo -e -n "\e[0;31mNot a HathoutDB command\n"
 	fi
+
+#########################################End DEALING WIH collections##############################################
+
+#######################################Dealing with Documents################################
 
 done
 echo "Bye Bye"
