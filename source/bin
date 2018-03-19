@@ -73,15 +73,26 @@ elif [[ $cmd =~ ^db.+drop\(\) ]]; then
 		  fi
 
 
-	elif [[ $cmd == $EOF ]]; then
-			echo -e -n "\e[0;31mThank you for using HathoutDB\n"
-	else
-			echo -e -n "\e[0;31mNot a HathoutDB command\n"
-	fi
-
 #########################################End DEALING WIH collections##############################################
 
 #######################################Dealing with Documents################################
+# db.COLLECTION_NAME.insert(document): Intert into a collection document
+elif [[ $cmd =~ ^db.+insert\( ]]; then
+			if [[ !  -z  $currentdb ]]; then
+						read colName document < <(echo $cmd | awk -F'[.()]' '{print $2,$4}');
+						./createDocuments create $currentdb $colName "$document"
+			else
+						echo "You should type \$ use dbName before creating a collection"
+		  fi
 
+
+
+
+############################################################################################
+elif [[ $cmd == $EOF ]]; then
+		echo -e -n "\e[0;31mThank you for using HathoutDB\n"
+else
+		echo -e -n "\e[0;31mNot a HathoutDB command\n"
+fi
 done
 echo "Bye Bye"
