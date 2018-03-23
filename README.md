@@ -1,2 +1,0 @@
-# bashDatabase
-DBMS using bash 
