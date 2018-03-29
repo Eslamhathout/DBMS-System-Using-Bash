@@ -1,0 +1,319 @@
+#!/bin/bash
+
+
+
+
+
+
+
+
+function match_data {
+	datatype=$(head -1 $2 | cut -d ':' -f$3 | awk -F "-" 'BEGIN { RS = ":" } {print $2}')
+	if [[ "$1" = '' ]]; then
+		echo 0
+	elif [[ "$1" = -?(0) ]]; then
+		echo 1 # error!
+	elif [[ "$1" = ?(-)+([0-9])?(.)*([0-9]) ]]; then
+		if [[ $datatype == integer ]]; then
+			# datatype integer and the input is integer
+			echo 0
+		else
+			# datatype string and input is number
+			echo 0
+		fi
+	else
+		if [[ $datatype == integer ]]; then
+			# datatype integer and input is not
+			echo 1 # error!
+		else
+			# datatype string and input is string
+			echo 0
+		fi
+	fi
+}
+
+
+
+function match_size {
+	datasize=$(head -1 $2 | cut -d ':' -f$3 | awk -F "-" 'BEGIN { RS = ":" } {print $3}')
+	if [[ "${#1}" -le $datasize ]]; then
+		echo 0
+	else
+		echo 1 # error
+	fi
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+echo updating $1 and table $2
+
+
+			if ! [[ -f "../dbs/$1/$2" ]]; then
+						echo this table doesn\'t exist # color this
+						echo press any key
+						read
+			else
+						echo enter primary key \"$(head -1 "../dbs/$1/$2" | cut -d ':' -f1 |\
+						awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" of type $(head -1 "../dbs/$1/$2"\
+						| cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "../dbs/$1/$2"\
+						| cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $3}') of the record
+						read
+						linenum=''
+						linenum=$(cut -d ':' -f1 "../dbs/$1/$2" | sed '1d'\
+						| grep -x -n -e "$REPLY" | cut -d':' -f1)
+
+						if [[ "$REPLY" == '' ]]; then
+							echo no entry
+						elif [[ "$linenum" = '' ]]; then
+							echo this primary key doesn\'t exist
+						else
+							let linenum=$linenum+1
+							num_col=$(head -1 "../dbs/$1/$2" | awk -F: '{print NF}')
+							echo other values of record:
+							for (( i = 2; i <= num_col; i++ )); do
+									echo \"$(head -1 ../dbs/$1/$2 | cut -d ':' -f$i |\
+									awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" of type $(head -1 "../dbs/$1/$2" | cut -d ':' -f$i |\
+									awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "../dbs/$1/$2" | cut -d ':' -f$i |\
+									awk -F "-" 'BEGIN { RS = ":" } {print $3}'): $(sed -n "${linenum}p" "../dbs/$1/$2" | cut -d: -f$i)
+							done
+							echo ---------------------------------------------------------------------------------
+							echo fields:
+							option=$(head -1 ../dbs/$1/$2 | awk 'BEGIN{ RS = ":"; FS = "-" } {print $1}')
+							echo "$option"
+							flag31=true
+							while $flag31; do
+								echo --------------------------------------------------------------------------------
+								echo enter field to update
+								read
+								if [[ "$REPLY" = '' ]]; then
+									echo invalid entry
+									echo press any key
+									read
+								elif [[ $(echo "$option" | grep -x "$REPLY") = "" ]]; then
+									echo no such field
+								else
+									fieldnum=$(head -1 "../dbs/$1/$2" | awk 'BEGIN{ RS = ":"; FS = "-" } {print $1}'\
+									| grep -x -n "$REPLY" | cut -d: -f1)
+									flag311=true
+									while $flag311; do
+										if [[ "$fieldnum" = 1 ]]; then
+											echo enter primary key \"$(head -1 "../dbs/$1/$2" | cut -d ':' -f1 |\
+											awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" of type $(head -1 "../dbs/$1/$2"\
+											| cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "../dbs/$1/$2"\
+											| cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $3}')
+
+											read
+											dflag=$(match_data "$REPLY" "../dbs/$1/$2" 1)
+											sflag=$(match_size "$REPLY" "../dbs/$1/$2" 1)
+											pk_uflag=$(cut -d ':' -f1 "../dbs/$1/$2" | awk '{if(NR != 1) print $0}' | grep -x -e "$REPLY")
+
+											if [[ "$REPLY" == '' ]]; then
+												echo no entry
+											elif [[ "$dflag" == 1 ]]; then # if primary key exist
+												echo entry invalid
+											elif [[ "$sflag" == 1 ]]; then
+												echo entry size invalid
+											elif ! [[ "$pk_uflag" == '' ]]; then
+												echo this primary key already used
+											else # primary key is valid
+												awk -v fn="$fieldnum" -v rn="$linenum" -v nv="$REPLY"\
+												'BEGIN { FS = OFS = ":" } { if(NR == rn)	$fn = nv } 1' "../dbs/$1/$2"\
+												> "../dbs/$1/$2".new && rm "../dbs/$1/$2" && mv "../dbs/$1/$2".new "../dbs/$1/$2"
+												flag311=false
+												flag31=false
+											fi
+										else
+											flag311=true
+											while $flag311 ; do
+												echo enter \"$(head -1 ../dbs/$1/$2 | cut -d ':' -f$fieldnum |\
+												awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" of type $(head -1 "../dbs/$1/$2" | cut -d ':' -f$fieldnum |\
+												awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "../dbs/$1/$2" | cut -d ':' -f$fieldnum |\
+												awk -F "-" 'BEGIN { RS = ":" } {print $3}')
+												read
+												dflag=$(match_data "$REPLY" "../dbs/$1/$2" "$fieldnum")
+												sflag=$(match_size "$REPLY" "../dbs/$1/$2" "$fieldnum")
+
+												if [[ "$dflag" == 1 ]]; then # if primary key exist
+													echo entry invalid
+												elif [[ "$sflag" == 1 ]]; then
+													echo entry size invalid
+												else # entry is valid
+													awk -v fn="$fieldnum" -v rn="$linenum" -v nv="$REPLY"\
+													'BEGIN { FS = OFS = ":" } { if(NR == rn)	$fn = nv } 1' "../dbs/$1/$2"\
+													> "../dbs/$1/$2".new && rm "../dbs/$1/$2" && mv "../dbs/$1/$2".new "../dbs/$1/$2"
+													flag311=false
+													flag31=false
+												fi
+											done
+										fi
+									done
+								fi
+							done
+						fi
+						echo press any key
+						read
+				fi
+
+
+
+
+
+
+
+
+
+
+
+# #m7tag a check an al table leh stracture al awal 2bl al insertion
+# function match_data {
+# 	datatype=$(head -1 $2 | cut -d ':' -f$3 | awk -F "-" 'BEGIN { RS = ":" } {print $2}')
+# 	if [[ "$1" = '' ]]; then
+# 		echo 0
+# 	elif [[ "$1" = -?(0) ]]; then
+# 		echo 1 # error!
+# 	elif [[ "$1" = ?(-)+([0-9])?(.)*([0-9]) ]]; then
+# 		if [[ $datatype == integer ]]; then
+# 			# datatype integer and the input is integer
+# 			echo 0
+# 		else
+# 			# datatype string and input is number
+# 			echo 0
+# 		fi
+# 	else
+# 		if [[ $datatype == integer ]]; then
+# 			# datatype integer and input is not
+# 			echo 1 # error!
+# 		else
+# 			# datatype string and input is string
+# 			echo 0
+# 		fi
+# 	fi
+# }
+#
+#
+#
+# function match_size {
+# 	datasize=$(head -1 $2 | cut -d ':' -f$3 | awk -F "-" 'BEGIN { RS = ":" } {print $3}')
+# 	if [[ "${#1}" -le $datasize ]]; then
+# 		echo 0
+# 	else
+# 		echo 1 # error
+# 	fi
+# }
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+# # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+#   if ! [[ -f "../dbs/$1/$2" ]]; then
+#     echo this table doesn\'t exist # color this
+#     echo press any key
+#     read
+#   else
+#     flag31=true
+#     while $flag31 ; do
+#       echo enter primary key \"$(head -1 "../dbs/$1/$2" | cut -d ':' -f1 |\
+#       awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" of type $(head -1 "../dbs/$1/$2"\
+#       | cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "../dbs/$1/$2"\
+#       | cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $3}')
+#
+#       read
+#       dflag=$(match_data "$REPLY" "../dbs/$1/$2" 1)
+#       sflag=$(match_size "$REPLY" "../dbs/$1/$2" 1)
+#       pk_uflag=$(cut -d ':' -f1 "../dbs/$1/$2" | awk '{if(NR != 1) print $0}' | grep -x -e "$REPLY")
+#
+#       if [[ "$REPLY" == '' ]]; then
+#         echo no entry
+#       elif [[ "$dflag" == 1 ]]; then # if primary key exist
+#         echo entry invalid
+#       elif [[ "$sflag" == 1 ]]; then
+#         echo entry size invalid
+#       elif ! [[ "$pk_uflag" == '' ]]; then
+#         echo this primary key already used
+#       else # primary key is valid
+#         echo -n "$REPLY" >> "../dbs/$1/$2"
+#         echo -n ':' >> "../dbs/$1/$2"
+#         num_col=$(head -1 "../dbs/$1/$2" | awk -F: '{print NF}') # to get number of columns in table
+#         echo number of coloums $num_col
+#         for (( i = 2; i <= num_col; i++ )); do
+#           flag311=true
+#           while $flag311 ; do
+#             echo enter \"$(head -1 ../dbs/$1/$2 | cut -d ':' -f$i |\
+#             awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" of type $(head -1 "../dbs/$1/$2" | cut -d ':' -f$i |\
+#             awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "../dbs/$1/$2" | cut -d ':' -f$i |\
+#             awk -F "-" 'BEGIN { RS = ":" } {print $3}')
+#             read
+#             dflag=$(match_data "$REPLY" "../dbs/$1/$2" "$i")
+#             sflag=$(match_size "$REPLY" "../dbs/$1/$2" "$i")
+#
+#             if [[ "$dflag" == 1 ]]; then # if primary key exist
+#               echo entry invalid
+#             elif [[ "$sflag" == 1 ]]; then
+#               echo entry size invalid
+#             else # entry is valid
+#               if [[ i -eq $num_col ]]; then
+#                 echo "$REPLY" >> "../dbs/$1/$2"
+#                 flag311=false
+#                 flag31=false
+#                 echo entry inserted successfully
+#               else
+#                 echo -n "$REPLY": >> "../dbs/$1/$2"
+#                 flag311=false
+#               fi
+#             fi
+#           done
+#         done
+#       fi
+#     done
+#     echo press any key
+#     read
+#   fi

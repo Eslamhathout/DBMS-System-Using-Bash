@@ -1,0 +1,82 @@
+#!/bin/bash
+
+
+
+#Create: creating a document if a colletion in exist
+if [[ $1 == "find" ]]; then
+    if [ ! -f "../dbs/$2/$3" ]; then
+      echo "Colletion $3 is not found"
+    else
+      echo "collection $3 data:"
+      echo "["
+      cat ../dbs/$2/$3
+      echo "]"
+    fi
+fi
+
+
+
+
+
+
+
+
+
+
+
+# #Create: creating a collection if not exist
+# if [[ $1 == "create" ]]; then
+#     if [ ! -f "../dbs/$2/$3" ]; then
+#       touch ../dbs/$2/$3
+#       echo "Colletion $3 created"
+#     else
+#       echo "Collection $3 already exist"
+#     fi
+#
+# #To list all collections
+# elif [[ $1 == "show" ]]; then
+#     for i in $(ls -f ../dbs/$2*/); do echo ${i%%/}; done
+#
+# elif [[ $1 == "drop" ]]; then
+#     if [ ! -f "../dbs/$2/$3" ]; then
+#           echo "There is no colletion $3 "
+#     else
+#           rm ../dbs/$2/$3
+#           echo "Collection $3 dropped"
+#     fi
+#
+# fi
+#
+#
+#
+#
+#
+#
+#
+# #
+# # # #Creating a db 'directory' if not exist
+# #
+# # #To list all dbs
+# # if [[ $1 == "show" ]]; then
+# #   for i in $(ls -d ../dbs/*/); do echo ${i%%/}; done
+# #
+# #
+# # #To drop a db is exist
+# # elif [[ $1 == "db.dropDatabase()" ]]; then
+# #     if [ ! -d "../dbs/$2" ]; then
+# #         echo "There is no db $2 exist"
+# #     else
+# #         rm -r ../dbs/$2
+# #         echo "$2 db dropped.."
+# #     fi
+# #
+# # #To create new db if not exit already
+# # else
+# #     if [ ! -d "../dbs/$1" ]; then
+# #       echo "Creating New db $1"
+# #       mkdir ../dbs/$1
+# #       echo "Switching to $1 db.."
+# #     else
+# #       echo "Switching to $1 db.."
+# #     fi
+# # fi

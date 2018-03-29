@@ -8,7 +8,7 @@ if [[ $1 == "show" ]]; then
 
 
 #To drop a db is exist
-elif [[ $1 == "db.dropDatabase()" ]]; then
+elif [[ $1 == "drop" ]]; then
     if [ ! -d "../dbs/$2" ]; then
         echo "There is no db $2 exist"
     else

@@ -1,12 +1,12 @@
 #!/bin/bash
 
-#Create: creating a collection if not exist
+#Create: creating a table if not exist
 if [[ $1 == "create" ]]; then
     if [ ! -f "../dbs/$2/$3" ]; then
       touch ../dbs/$2/$3
-      echo "Colletion $3 created"
+      echo "Table $3 created"
     else
-      echo "Collection $3 already exist"
+      echo "Table $3 already exist"
     fi
 
 #To list all collections
@@ -15,10 +15,10 @@ elif [[ $1 == "show" ]]; then
 
 elif [[ $1 == "drop" ]]; then
     if [ ! -f "../dbs/$2/$3" ]; then
-          echo "There is no colletion $3 "
+          echo "There is no table $3 "
     else
           rm ../dbs/$2/$3
-          echo "Collection $3 dropped"
+          echo "Table $3 dropped"
     fi
 
 fi
