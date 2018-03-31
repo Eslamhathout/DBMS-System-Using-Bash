@@ -1,0 +1,55 @@
+#!/bin/bash
+
+echo "Deleting data in database $1 and table $2"
+
+# #Getting the first 3 Lines
+# l1=$(sed  '1q;d' "../dbs/$1/$2")
+# l2=$(sed  '2q;d' "../dbs/$1/$2")
+# l3=$(sed  '3q;d' "../dbs/$1/$2")
+
+
+if ! [[ -f "../dbs/$1/$2" ]]; then
+		echo Table $2 doesn\'t exist
+else
+		#Getting the first 3 Lines
+		l1=$(sed  '1q;d' "../dbs/$1/$2")
+		l2=$(sed  '2q;d' "../dbs/$1/$2")
+		l3=$(sed  '3q;d' "../dbs/$1/$2")
+		# Reading the first and second lines of the file to check if there is a table stracture and data
+		if [[ "$l1" == '' ]]; then
+								echo
+								echo ">Table $2 either does not have a stracure or data."
+								echo ">Use the following commands to stracture your table and insert data."
+								echo "\$ STRACTURE TABLE $2" 'then' "\$ INSERT DATA INTO TABLE $2"
+								echo
+
+		elif [[ "$l2" == '' ]] && [[ "$l3" == '' ]]; then
+								echo
+								echo ">Table $2 does not contain any data."
+								echo ">Use the following command to insert data: "
+								echo "\$ INSERT DATA INTO TABLE $2"
+								echo
+
+		else
+						echo enter primary key \"$(head -1 "../dbs/$1/$2" | cut -d ':' -f1 |\
+						awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" of type $(head -1 "../dbs/$1/$2"\
+						| cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "../dbs/$1/$2"\
+						| cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $3}') of the record to delete
+						read
+						linenum=''
+						linenum=$(cut -d ':' -f1 "../dbs/$1/$2" | awk '{if(NR != 1) print $0}'\
+						| grep -x -n -e "$REPLY" | cut -d':' -f1)
+
+						if [[ "$REPLY" == '' ]]; then
+							echo no entry
+						elif [[ "$linenum" = '' ]]; then
+							echo this primary key doesn\'t exist
+						else
+							let linenum=$linenum+1
+							sed -i "${linenum}d" "../dbs/$1/$2"
+							echo row deleted
+						fi
+						echo press any key
+						read
+		fi
+fi

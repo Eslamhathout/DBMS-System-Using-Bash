@@ -1,9 +1,12 @@
 #!/bin/bash
+echo
 echo -e -n "\e[0;33mWelcome to HathoutDB v.1\n"
-echo -e -n "\e[0;33m**You can use MongoDB commands for HathoutDB**\n"
+echo
 echo -e -n "\e[0;31m**For more info:"
-echo -e -n "\e[0;32m \$man HathoutDB\n"
+echo -e -n "\e[0;32m \$man HathoutDB"
 
+echo
+echo -e -n "\e[0;31m**You can exist HathoutDB safely by hitting CTRL-D\n"
 # echo -e -n "\e[0;32mHathoutDB>"
 # read cmd
 cmd=0
@@ -15,51 +18,51 @@ do
 	echo -e -n "\e[0;32mHathoutDB>"
 	read cmd
 	if [[ $cmd == "man HathoutDB" ]]; then
-			echo "Man page"
+			# echo "Man page"
+			./manPage
 
 
 ####################################DEALING WITH DATABASES######################################
-#CREATE DATABASE DatabaseName; : for opening a db or creating a new db if not exist
+#CREATE DATABASE DatabaseName: To create a new database if not exist
 	elif [[ $cmd =~ ^CREATE.DATABASE.[a-z|A-Z]+ ]]; then
 			echo Creating db..
 			dbNameTemp="${cmd//CREATE /}"
 			dbName="${dbNameTemp//DATABASE /}"
-			echo $dbName
 			./createdbs $dbName
 
 #To Start working with a DB use the command: USE DatabaseName
-#USE dbName: for opening a db or creating a new db if not exist
+#USE DatabaseName: To start working on a specific database with CRUD operations.
 	elif [[ $cmd =~ ^USE.[a-z|A-Z]+ ]]; then
 			dbName="${cmd//USE /}"
-			# currentdb=$dbName
-			# echo using databae $currentdb
 			if [ ! -d "../dbs/$dbName" ]; then
 					echo There is no database $dbName exist.
 			else
 					currentdb=$dbName
 					echo using database $currentdb
 			fi
-
-#SHOW DATABASES: to list all db names
+#SHOW DATABASES: to list all existing databases.
 	elif [[ $cmd == "SHOW DATABASES" ]]; then
 			./createdbs show
 
-#DROP DATABASE databaseName: Drop a database that is currently in use "You have to make use dbName before using it"
+#DROP DATABASE databaseName: To drop a database from the existing databases.
 	elif [[ $cmd =~ ^DROP.DATABASE.[a-z|A-Z]+ ]]; then
 				dbNameTemp="${cmd//DROP /}"
 				dbName="${dbNameTemp//DATABASE /}"
 				./createdbs drop $dbName
-#current db(): To specify the currently used db
-	elif [[ $cmd == "current db()" ]]; then
+
+#CURRENT DATABASE: To specify the currently in use database.
+elif [[ $cmd == "CURRENT DATABASE" ]]; then
 				if [[ !  -z  $currentdb ]]; then
 							echo Your are using: $currentdb
 				else
 							echo "You should type \$ USE DatabaseName to deal with a certain db."
 				fi
 #########################################End DEALING WIH DATABSES##############################################
-#######################################Dealing with Tables################################
 
-# CREATE TABLE TableName: For creating table.
+
+
+#######################################Dealing with Tables################################
+# CREATE TABLE TableName: To create a new table.
 	elif [[ $cmd =~ ^CREATE.TABLE.[a-z|A-Z]+ ]]; then
 			echo creating table..
 			tableNameTemp="${cmd//CREATE /}"
@@ -70,15 +73,15 @@ do
 						echo "You should type \$ USE dbName before creating a table"
 		  fi
 
-#show collections: To list all collection names
+#SHOW TABLES: To list all collection names
 	elif [[ $cmd == "SHOW TABLES" ]]; then
 			if [[ !  -z  $currentdb ]]; then
 						./createTables show $currentdb
 			else
-						echo "You should type \$ USE dbName before displaying it's tables."
+						echo "You should type \$USE DatabaseName before displaying it's tables."
 		  fi
 
-#DROP TABLE table_name: To drop a table from existing db
+#DROP TABLE table_name: To drop a table from an existing and in use database.
 	elif [[ $cmd =~ ^DROP.TABLE.[a-z|A-Z]+ ]]; then
 				echo dropping table..
 				tableNameTemp="${cmd//DROP /}"
@@ -99,63 +102,60 @@ do
 					else
 								echo "You should type \$ USE dbName before stracturing a table"
 				 	fi
-#########################################End DEALING WIH TABLES##############################################
-#######################################Dealing with Data INSERTION################################
+#########################################End DEALING WIH TABLES##########################################
+
+
+#######################################Dealing with Data INSERTing and UPDATING##########################
 #INSERT INTO TABLE table_name: To insert data into specific table.
 	elif [[ $cmd =~ ^INSERT.INTO.[a-z|A-Z]+ ]]; then
-				echo inserting data into table..
+				# echo inserting data into table..
 				tableNameTemp="${cmd//INSERT /}"
 				tableNameTemp="${tableNameTemp//INTO /}"
 				tableName="${tableNameTemp//TABLE /}"
 				if [[ !  -z  $currentdb ]]; then
-							./insertingData $currentdb $tableName
+									./insertingData $currentdb $tableName
 				else
 							echo "You should type \$ USE dbName before inserting data into table"
 			 	fi
 
-
 #UPDATE DATA INTO table_name: To update data into specific table.
 elif [[ $cmd =~ ^UPDATE.DATA.[a-z|A-Z]+ ]]; then
-				echo updating data into table..
 				tableNameTemp="${cmd//UPDATE /}"
 				tableNameTemp="${tableNameTemp//DATA /}"
 				tableName="${tableNameTemp//INTO /}"
-				echo $tableName to upd
+				# echo $tableName to upd
 				if [[ !  -z  $currentdb ]]; then
 								./updatingData $currentdb $tableName
 				else
 								echo "You should type \$ USE dbName before updating data into table"
 			 	fi
 
+#DELETE DATA FROM table_name: To delete specific data row from specific table.
+elif [[ $cmd =~ ^DELETE.DATA.[a-z|A-Z]+ ]]; then
+				tableNameTemp="${cmd//DELETE /}"
+				tableNameTemp="${tableNameTemp//DATA /}"
+				tableName="${tableNameTemp//FROM /}"
+				if [[ !  -z  $currentdb ]]; then
+								./deletingData $currentdb $tableName
+				else
+								echo "You should type \$ USE dbName before updating data into table"
+			 	fi
 
 
+#SELECT DATA FROM table_name: To display specific row of data or all the table from specific table.
+elif [[ $cmd =~ ^SELECT.DATA.[a-z|A-Z]+ ]]; then
+				tableNameTemp="${cmd//SELECT /}"
+				tableNameTemp="${tableNameTemp//DATA /}"
+				tableName="${tableNameTemp//FROM /}"
+				if [[ !  -z  $currentdb ]]; then
+								./selectingData $currentdb $tableName
+				else
+								echo "You should type \$ USE dbName before updating data into table"
+			 	fi
 
-# #######################################Dealing with Data################################
-# # db.COLLECTION_NAME.insert(document): Intert into a collection document
-# elif [[ $cmd =~ ^db.+insert\( ]]; then
-# 			if [[ !  -z  $currentdb ]]; then
-# 						read colName document < <(echo $cmd | awk -F'[.()]' '{print $2,$4}');
-# 						./createDocuments create $currentdb $colName "$document"
-# 			else
-# 						echo "You should type \$ use dbName before creating a collection"
-# 		  fi
-#
-# #################################End DEALING WIH Documents################################################
-#
-# ######################################Dealing with Display################################
-# # db.COLLECTION_NAME.find(document): Intert into a collection document
-# elif [[ $cmd =~ ^db.+find\( ]]; then
-# 			if [[ !  -z  $currentdb ]]; then
-# 						read colName document < <(echo $cmd | awk -F'[.()]' '{print $2,$4}');
-# 						./findDocuments find $currentdb $colName "$document"
-# 						echo "You need to find db $currentdb, coloum name $colName "
-# 			else
-# 						echo "You should type \$ use dbName before creating a collection"
-# 		  fi
-#
-#
-# ############################################################################################
+#######################################Dealing with Data################################
 elif [[ $cmd == $EOF ]]; then
+		echo
 		echo -e -n "\e[0;31mThank you for using HathoutDB\n"
 else
 		echo -e -n "\e[0;31mNot a HathoutDB command\n"

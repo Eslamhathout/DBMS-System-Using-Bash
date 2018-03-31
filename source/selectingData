@@ -1,0 +1,89 @@
+#!/bin/bash
+
+echo "Selecting data in database $1 and table $2"
+
+# #Getting the first 3 Lines
+# l1=$(sed  '1q;d' "../dbs/$1/$2")
+# l2=$(sed  '2q;d' "../dbs/$1/$2")
+# l3=$(sed  '3q;d' "../dbs/$1/$2")
+
+if ! [[ -f "../dbs/$1/$2" ]]; then
+		echo Table $2 doesn\'t exist
+else
+		#Getting the first 3 Lines
+		l1=$(sed  '1q;d' "../dbs/$1/$2")
+		l2=$(sed  '2q;d' "../dbs/$1/$2")
+		l3=$(sed  '3q;d' "../dbs/$1/$2")
+		# Reading the first and second lines of the file to check if there is a table stracture and data
+		if [[ "$l1" == '' ]]; then
+								echo
+								echo ">Table $2 either does not have a stracure or data."
+								echo ">Use the following commands to stracture your table and insert data."
+								echo "\$ STRACTURE TABLE $2" 'then' "\$ INSERT DATA INTO TABLE $2"
+								echo
+
+		elif [[ "$l2" == '' ]] && [[ "$l3" == '' ]]; then
+								echo
+								echo ">Table $2 does not contain any data."
+								echo ">Use the following command to insert data: "
+								echo "\$ INSERT DATA INTO TABLE $2"
+								echo
+
+		else
+						echo "> Do you need to display a single row or all rows?"
+						echo "> Press 1 for specific row or 2 for displaying all the rows in table $2"
+						read selectingOption
+						if [[ "$selectingOption" -eq 1 ]]; then
+									echo Enter a value for PK \"$(head -1 "../dbs/$1/$2" | cut -d ':' -f1 |\
+									awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" which should of typee $(head -1 "../dbs/$1/$2"\
+									| cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "../dbs/$1/$2"\
+									| cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $3}')
+									read
+									linenum=$(cut -d ':' -f1 "../dbs/$1/$2" | sed '1d'\
+									| grep -x -n -e "$REPLY" | cut -d':' -f1)
+
+									if [[ "$REPLY" == '' ]]; then
+										echo no entry
+									elif [[ "$linenum" = '' ]]; then
+										echo this primary key doesn\'t exist
+									else
+										let linenum=$linenum+1
+										num_col=$(head -1 "../dbs/$1/$2" | awk -F: '{print NF}') # to get number of columns in table
+										echo
+										echo "Your row's data is:"
+										echo \"$(head -1 "../dbs/$1/$2" | cut -d ':' -f1 |\
+										awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" : $REPLY
+										for (( i = 2; i <= num_col; i++ )); do
+												echo  \"$(head -1 ../dbs/$1/$2 | cut -d ':' -f$i |\
+												awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" : $(sed -n "${linenum}p" "../dbs/$1/$2" | cut -d: -f$i)
+										done
+										echo
+									fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+						elif [[ "$selectingOption" -eq 2 ]]; then
+									head -1 "../dbs/$1/$2" | awk 'BEGIN{ RS = ":"; FS = "-" } {print $1}' | awk 'BEGIN{ORS="\t"} {print $0}'
+									echo -n $'\n'
+									sed '1d' "../dbs/$1/$2" | awk -F: 'BEGIN{OFS="\t"} {for(n = 1; n <= NF; n++) $n=$n}  1'
+									echo "Press any key to continue.."
+									read
+						else
+									echo Invalid Entry
+						fi
+		fi
+fi

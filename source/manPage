@@ -1,0 +1,51 @@
+#!/bin/bash
+
+echo
+
+echo -e -n "\e[0;33mWelcome to HathoutDB v.1\n"
+echo -e -n "\e[0;31m**You can use near mySQL commands for HathoutDB**\n"
+
+echo
+
+
+####################################DEALING WITH DATABASES######################################
+
+echo -e -n "\e[0;31m>DEALING WITH DATABASES COMMANDS:\n"
+echo
+echo -e -n "\e[0;32m1- CREATE DATABASE DatabaseName: To create a new database if not exist.\n"
+#CREATE DATABASE DatabaseName: To create a new database if not exist
+echo -e -n "\e[0;32m2- USE DatabaseName: To start working on a specific database with CRUD operations.\n"
+#USE DatabaseName: To start working on a specific database with CRUD operations.
+echo -e -n "\e[0;32m3- DROP DATABASE databaseName: To drop a database from the existing databases.\n"
+#DROP DATABASE databaseName: To drop a database from the existing databases.
+echo -e -n "\e[0;32m4- CURRENT DATABASE: To specify the currently in use database.\n"
+#CURRENT DATABASE: To specify the currently in use database.
+
+echo
+echo
+echo -e -n "\e[0;31m>DEALING WITH TABLES COMMANDS:\n"
+echo
+echo -e -n "\e[0;32m1- CREATE TABLE TableName: To create a new table.\n"
+#CREATE TABLE TableName: To create a new table
+echo -e -n "\e[0;32m2- SHOW TABLES: To list all collection names.\n"
+#SHOW TABLES: To list all collection names
+echo -e -n "\e[0;32m3- DROP TABLE table_name: To drop a table from an existing and in use database.\n"
+#DROP TABLE table_name: To drop a table from an existing and in use database
+echo -e -n "\e[0;32m4- STRACTURE TABLE table_name: To set the stracture needed for a specific table.\n"
+#STRACTURE TABLE table_name: To set the stracture needed for a specific table.
+
+echo
+echo
+echo -e -n "\e[0;31m>DEALING WITH INSERTING UPDATING SELECTING DATA COMMANDS:\n"
+echo
+echo -e -n "\e[0;32m1- INSERT INTO TABLE table_name: To insert data into specific table.\n"
+# INSERT INTO TABLE table_name: To insert data into specific table.
+echo -e -n "\e[0;32m2- UPDATE DATA INTO table_name: To update data into specific table.\n"
+#UPDATE DATA INTO table_name: To update data into specific table.
+echo -e -n "\e[0;32m3- DELETE DATA FROM table_name: To delete specific data row from specific table.\n"
+#DELETE DATA FROM table_name: To delete specific data row from specific table.
+echo -e -n "\e[0;32m4- SELECT DATA FROM table_name: To display specific row of data or all the table from specific table.\n"
+#SELECT DATA FROM table_name: To display specific row of data or all the table from specific table.
+echo
+echo "Press any key to continue.."
+read

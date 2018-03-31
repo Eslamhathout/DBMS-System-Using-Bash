@@ -21,8 +21,7 @@ else
     if [ ! -d "../dbs/$1" ]; then
       echo "Creating New db $1"
       mkdir ../dbs/$1
-      echo "Switching to $1 db.."
     else
-      echo "Switching to $1 db.."
+      echo "You already have a database called $1"
     fi
 fi

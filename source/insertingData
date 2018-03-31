@@ -1,134 +1,95 @@
 #!/bin/bash
 
-#m7tag a check an al table leh stracture al awal 2bl al insertion
-
-datatype=$(head -1 $2 | cut -d ':' -f$3 | awk -F "-" 'BEGIN { RS = ":" } {print $2}')
-echo datatype is $datatype
-
-function match_data {
-	datatype=$(head -1 $2 | cut -d ':' -f$3 | awk -F "-" 'BEGIN { RS = ":" } {print $2}')
-	if [[ "$1" = '' ]]; then
-		    echo 0
-	elif [[ "$1" = -?(0) ]]; then
-		    echo 1 # error!
-	elif [[ "$1" = ?(-)+([0-9])?(.)*([0-9]) ]]; then
-    		if [[ $datatype == integer ]]; then
-    			# datatype integer and the input is integer
-    			echo 0
-    		else
-    			# datatype string and input is number
-    			echo 0
-    		fi
-	else
-    		if [[ $datatype == integer ]]; then
-    			# datatype integer and input is not
-    			echo 1 # error!
-    		else
-    			# datatype string and input is string
-    			echo 0
-    		fi
-	fi
+function dataChecker {
+			predefinedDataType=$(head -1 $2 | cut -d ':' -f$3 | awk -F "-" 'BEGIN { RS = ":" } {print $2}')
+			if [[ "$1" = '' ]]; then
+				echo 0
+			elif [[ "$1" = -?(0) ]]; then
+				echo 1
+			elif [[ "$1" = ?(-)+([0-9])?(.)*([0-9]) ]]; then
+				if [[ $predefinedDataType == Integer ]]; then
+					echo 0
+				else
+					echo 0
+				fi
+			else
+				if [[ $predefinedDataType == Integer ]]; then
+					echo 1
+				else
+					echo 0
+				fi
+			fi
 }
-
-
-
-function match_size {
-	datasize=$(head -1 $2 | cut -d ':' -f$3 | awk -F "-" 'BEGIN { RS = ":" } {print $3}')
-	if [[ "${#1}" -le $datasize ]]; then
-		echo 0
-	else
-		echo 1 # error
-	fi
+function sizeChecker {
+			predefinedSize=$(head -1 $2 | cut -d ':' -f$3 | awk -F "-" 'BEGIN { RS = ":" } {print $3}')
+			if [[ "${#1}" -le $predefinedSize ]]; then
+				echo 0
+			else
+				echo 1
+			fi
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+if ! [[ -f "../dbs/$1/$2" ]]; then
+  		echo Table $2 doesn\'t exist
+else
+			# Reading the first line of the file to check if there is a table stracture
+			read -r line < "../dbs/$1/$2"
+			if [[ ${line} == '' ]]; then
+						echo ">There is no stracture for table $2."
+						echo ">Use the following command to stracture your table."
+						echo "\$ STRACTURE TABLE $2"
+						echo
+			else
+		      echo \> Enter a value for the primary key which named \"$(head -1 "../dbs/$1/$2" | cut -d ':' -f1 |\
+		      awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" and has a/an $(head -1 "../dbs/$1/$2"\
+		      | cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $2}') type and size equal $(head -1 "../dbs/$1/$2"\
+		      | cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $3}')
+		      read
+		      dataCheckerFlag=$(dataChecker "$REPLY" "../dbs/$1/$2" 1)
+		      sizeCheckerFlag=$(sizeChecker "$REPLY" "../dbs/$1/$2" 1)
+		      primaryKeyChecker=$(cut -d ':' -f1 "../dbs/$1/$2" | awk '{if(NR != 1) print $0}' | grep -x -e "$REPLY")
+		      if [[ "$REPLY" == '' ]]; then
+		        echo Please Enter a value
+		      elif [[ "$dataCheckerFlag" == 1 ]]; then
+		        echo Invalid Entry
+		      elif [[ "$sizeCheckerFlag" == 1 ]]; then
+		        echo Invalid Entry
+		      elif ! [[ "$primaryKeyChecker" == '' ]]; then
+		        echo This primary key is already in use
+		      else
+		        echo -n "$REPLY" >> "../dbs/$1/$2"
+		        echo -n ':' >> "../dbs/$1/$2"
+		        numOfColums=$(head -1 "../dbs/$1/$2" | awk -F: '{print NF}')
+		        #number of coloums
+		        for (( i = 2; i <= numOfColums; i++ )); do
+		              insuringDataFlag=true
+		              while $insuringDataFlag ; do
+		                echo Enter a value for the column \"$(head -1 ../dbs/$1/$2 | cut -d ':' -f$i |\
+		                awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" of type $(head -1 "../dbs/$1/$2" | cut -d ':' -f$i |\
+		                awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "../dbs/$1/$2" | cut -d ':' -f$i |\
+		                awk -F "-" 'BEGIN { RS = ":" } {print $3}')
+		                read
+		                dataCheckerFlag=$(dataChecker "$REPLY" "../dbs/$1/$2" "$i")
+		                sizeCheckerFlag=$(sizeChecker "$REPLY" "../dbs/$1/$2" "$i")
 
-
-  if ! [[ -f "../dbs/$1/$2" ]]; then
-    echo this table doesn\'t exist # color this
-    echo press any key
-    read
-  else
-    flag31=true
-    while $flag31 ; do
-      echo enter primary key \"$(head -1 "../dbs/$1/$2" | cut -d ':' -f1 |\
-      awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" of type $(head -1 "../dbs/$1/$2"\
-      | cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "../dbs/$1/$2"\
-      | cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $3}')
-
-      read
-      dflag=$(match_data "$REPLY" "../dbs/$1/$2" 1)
-      sflag=$(match_size "$REPLY" "../dbs/$1/$2" 1)
-      pk_uflag=$(cut -d ':' -f1 "../dbs/$1/$2" | awk '{if(NR != 1) print $0}' | grep -x -e "$REPLY")
-
-      if [[ "$REPLY" == '' ]]; then
-        echo no entry
-      elif [[ "$dflag" == 1 ]]; then # if primary key exist
-        echo entry invalid
-      elif [[ "$sflag" == 1 ]]; then
-        echo entry size invalid
-      elif ! [[ "$pk_uflag" == '' ]]; then
-        echo this primary key already used
-      else # primary key is valid
-        echo -n "$REPLY" >> "../dbs/$1/$2"
-        echo -n ':' >> "../dbs/$1/$2"
-        num_col=$(head -1 "../dbs/$1/$2" | awk -F: '{print NF}') # to get number of columns in table
-        echo number of coloums $num_col
-        for (( i = 2; i <= num_col; i++ )); do
-          flag311=true
-          while $flag311 ; do
-            echo enter \"$(head -1 ../dbs/$1/$2 | cut -d ':' -f$i |\
-            awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" of type $(head -1 "../dbs/$1/$2" | cut -d ':' -f$i |\
-            awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "../dbs/$1/$2" | cut -d ':' -f$i |\
-            awk -F "-" 'BEGIN { RS = ":" } {print $3}')
-            read
-            dflag=$(match_data "$REPLY" "../dbs/$1/$2" "$i")
-            sflag=$(match_size "$REPLY" "../dbs/$1/$2" "$i")
-
-            if [[ "$dflag" == 1 ]]; then # if primary key exist
-              echo entry invalid
-            elif [[ "$sflag" == 1 ]]; then
-              echo entry size invalid
-            else # entry is valid
-              if [[ i -eq $num_col ]]; then
-                echo "$REPLY" >> "../dbs/$1/$2"
-                flag311=false
-                flag31=false
-                echo entry inserted successfully
-              else
-                echo -n "$REPLY": >> "../dbs/$1/$2"
-                flag311=false
-              fi
-            fi
-          done
-        done
+		                if [[ "$dataCheckerFlag" == 1 ]]; then # if primary key exist
+		                  echo Invalid entry value.
+		                elif [[ "$sizeCheckerFlag" == 1 ]]; then
+		                  echo Invalid entry size.
+		                else # entry is valid
+		                  if [[ i -eq $numOfColums ]]; then
+		                    echo "$REPLY" >> "../dbs/$1/$2"
+		                    insuringDataFlag=false
+		                    echo Entry inserted successfully
+		                  else
+		                    echo -n "$REPLY": >> "../dbs/$1/$2"
+		                    insuringDataFlag=false
+		                  fi
+		                fi
+		              done
+		        done
       fi
-    done
-    echo press any key
-    read
-  fi
+	fi
+fi

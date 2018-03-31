@@ -2,160 +2,106 @@
 
 
 # Stracturing the table
-# lazm check if an stracture m3mol abl kda wla l2a ?
-  if [[ -f "../dbs/$1/$2" ]]; then
-    testF=true
-    while $testF; do
-      echo How many columns in table $2 you want?
-      read num_col
-      if [[ "$num_col" = +([1-9])*([0-9]) ]]; then
-        testF=false
+if [[ -f "../dbs/$1/$2" ]]; then
+    ensuringDataFlag=true
+    while $ensuringDataFlag; do
+      echo ">How many columns in table $2 you want?"
+      read numOfColums
+      if [[ "$numOfColums" = +([1-9])*([0-9]) ]]; then
+        ensuringDataFlag=false
       else
-        echo invalid entry
+        echo "Invalid entry"
       fi
     done
     flag31=true
     while $flag31; do
-      echo enter primary key name # to limit size of name
+      echo
+      echo ">Enter PK name:"
       read pk_name
       if ! [[ "$pk_name" = '' ]]; then
         echo -n "$pk_name" >> "../dbs/$1/$2"
         echo -n "-" >> "../dbs/$1/$2"
         flag31=false
       else
-        echo invalid entry
+        echo "Invalid entry"
       fi
     done
     flag31=true
     while $flag31; do
-      echo enter primary key datatype
-      select choice in "integer" "string"; do
+      echo "Enter PK datatype: "
+      select choice in "Integer" "String"; do
         if [[ "$REPLY" = "1" || "$REPLY" = "2" ]]; then
           echo -n "$choice" >> "../dbs/$1/$2"
           echo -n "-" >> "../dbs/$1/$2"
           flag31=false
         else
-          echo invalid choice
+          echo "Invalid entry"
         fi
         break
       done
     done
     flag31=true
     while $flag31; do
-      echo enter size please
+      echo "Enter column size: "
       read size
       if [[ "$size" = +([1-9])*([0-9]) ]]; then
         echo -n "$size" >> "../dbs/$1/$2"
         echo -n ":" >> "../dbs/$1/$2"
         flag31=false
       else
-        echo invalid entry
+        echo "Invalid entry"
       fi
     done
-    for (( i = 1; i < num_col; i++ )); do
+    for (( i = 1; i < numOfColums; i++ )); do
       flag31=true
       while $flag31; do
-        echo enter field $[i+1] name
+        echo
+        echo Enter field $[i+1] name:
         read pk_name
         if ! [[ "$pk_name" = '' ]]; then
           echo -n "$pk_name" >> "../dbs/$1/$2"
           echo -n "-" >> "../dbs/$1/$2"
           flag31=false
         else
-          echo invalid entry
+          echo "Invalid entry"
         fi
       done
       flag31=true
       while $flag31; do
-        echo enter field $[i+1] datatype # to make it by select and case
-        select choice in "integer" "string"; do
+        echo Enter field $[i+1] datatype:
+        select choice in "Integer" "String"; do
           if [[ "$REPLY" = "1" || "$REPLY" = "2" ]]; then
             echo -n "$choice" >> "../dbs/$1/$2"
             echo -n "-" >> "../dbs/$1/$2"
             flag31=false
           else
-            echo invalid choice
+            echo "Invalid entry"
           fi
           break
         done
       done
       flag31=true
       while $flag31; do
-        echo enter field $[i+1] size please
+        echo ">Enter field $[i+1] size:"
         read size
         if [[ "$size" = +([1-9])*([0-9]) ]]; then
           echo -n "$size" >> "../dbs/$1/$2"
-          if [[ i -eq $num_col-1 ]]; then
+          if [[ i -eq $numOfColums-1 ]]; then
             echo $'\n' >> "../dbs/$1/$2"
-            echo $'\n'table $2 stracture is created successfully
-            echo press any key
+            echo ">Table $2 stracture is created successfully"
+            echo "Press any key to continue .."
             read
           else
             echo -n ":" >> "../dbs/$1/$2"
           fi
           flag31=false
         else
-          echo invalid entry
+          echo "Invalid entry"
         fi
       done
     done
   else
-    echo invalid entry$'\n'press any key
+    echo "Invalid entry"
+    echo "Press any key to continue .."
     read
-  fi
-# #Create: creating a table if not exist
-# if [[ $1 == "create" ]]; then
-#     if [ ! -f "../dbs/$2/$3" ]; then
-#       touch ../dbs/$2/$3
-#       echo "Table $3 created"
-#     else
-#       echo "Table $3 already exist"
-#     fi
-#
-# #To list all collections
-# elif [[ $1 == "show" ]]; then
-#     for i in $(ls -f ../dbs/$2*/); do echo ${i%%/}; done
-#
-# elif [[ $1 == "drop" ]]; then
-#     if [ ! -f "../dbs/$2/$3" ]; then
-#           echo "There is no table $3 "
-#     else
-#           rm ../dbs/$2/$3
-#           echo "Table $3 dropped"
-#     fi
-#
-# fi
-
-
-
-
-
-
-
-#
-# # #Creating a db 'directory' if not exist
-#
-# #To list all dbs
-# if [[ $1 == "show" ]]; then
-#   for i in $(ls -d ../dbs/*/); do echo ${i%%/}; done
-#
-#
-# #To drop a db is exist
-# elif [[ $1 == "db.dropDatabase()" ]]; then
-#     if [ ! -d "../dbs/$2" ]; then
-#         echo "There is no db $2 exist"
-#     else
-#         rm -r ../dbs/$2
-#         echo "$2 db dropped.."
-#     fi
-#
-# #To create new db if not exit already
-# else
-#     if [ ! -d "../dbs/$1" ]; then
-#       echo "Creating New db $1"
-#       mkdir ../dbs/$1
-#       echo "Switching to $1 db.."
-#     else
-#       echo "Switching to $1 db.."
-#     fi
-# fi
+fi
